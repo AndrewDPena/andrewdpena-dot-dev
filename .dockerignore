@@ -1,0 +1,19 @@
+# Installed and built inside the image instead
+node_modules
+.next
+out
+
+# Not needed to build or run the app
+.git
+.gitignore
+.gitattributes
+.dockerignore
+Dockerfile
+README.md
+AGENTS.md
+CLAUDE.md
+*.log
+.idea
+
+# Never bake secrets into an image
+.env*
