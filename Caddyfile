@@ -1,0 +1,18 @@
+# Caddy sits between the Cloudflare tunnel and the app containers.
+# Cloudflare handles HTTPS at its edge, so Caddy only speaks plain HTTP
+# inside the Pi's private Docker network.
+{
+	auto_https off
+}
+
+# www -> bare domain, so the site has one canonical address.
+http://www.andrewdpena.dev {
+	redir https://andrewdpena.dev{uri} permanent
+}
+
+# Everything else goes to the Next.js app. Later, project routes
+# (e.g. FractMal's API) get their own handlers here.
+:80 {
+	encode zstd gzip
+	reverse_proxy web:3000
+}

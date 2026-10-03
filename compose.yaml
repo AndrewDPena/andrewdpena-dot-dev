@@ -1,13 +1,43 @@
 # Runs on the Raspberry Pi. The image is built by GitHub Actions (arm64),
 # so don't use this file to run the site on your Windows machine.
+#
+# Request path: visitor -> Cloudflare -> cloudflared (tunnel) -> caddy -> web
+# Nothing here is exposed to the internet directly; cloudflared makes an
+# outbound connection to Cloudflare, so no router port-forwarding is needed.
+
+# Shared log settings: cap each container at 3 x 10 MB to protect the SD card.
+x-logging: &logging
+  driver: local
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   web:
     image: ghcr.io/andrewdpena/andrewdpena-dot-dev:latest
     restart: unless-stopped
+    # LAN-only access for debugging (http://andrew-pi5.local:3000).
+    # Public traffic goes through caddy, not this port.
     ports:
       - "3000:3000"
-    logging:
-      driver: local
-      options:
-        max-size: "10m"
-        max-file: "3"
+    logging: *logging
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - web
+    logging: *logging
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      # Read from the .env file next to this one on the Pi (never committed).
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:?Set CLOUDFLARE_TUNNEL_TOKEN in .env}
+    depends_on:
+      - caddy
+    logging: *logging

@@ -17,3 +17,7 @@ CLAUDE.md
 
 # Never bake secrets into an image
 .env*
+compose.yaml
+Caddyfile
+scripts
+.github
