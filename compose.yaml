@@ -1,0 +1,13 @@
+# Runs on the Raspberry Pi. The image is built by GitHub Actions (arm64),
+# so don't use this file to run the site on your Windows machine.
+services:
+  web:
+    image: ghcr.io/andrewdpena/andrewdpena-dot-dev:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
