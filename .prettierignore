@@ -1,0 +1,4 @@
+# Generated or vendored files Prettier shouldn't touch
+package-lock.json
+CLAUDE.md
+AGENTS.md
